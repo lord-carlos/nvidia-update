@@ -5,11 +5,21 @@ $path_7z = "$env:programfiles\7-zip\7z.exe" #path to 7zip
 $version = $r.parsedhtml.GetElementsByClassName("gridItem")[2].innerText
 $dlFile = "$env:temp\$version.exe" #downloading to temp of current user.
 $extractDir = $PSScriptRoot #extracting to current dir of the script file.
-#Write-Host $dlFile
-#Write-Host $extractDir\$version
+
+Write-Host "Trying to detect installed driver version."
+
+$ins_version = (Get-WmiObject Win32_PnPSignedDriver | where {$_.devicename -like "*nvidia*" -and $_.devicename -notlike "*audio*"}).DriverVersion.SubString(7).Remove(1,1).Insert(3,".")
+
+Write-Host "Detected installed version is: $ins_version"
+
+if($version -eq $ins_version) {
+	Write-Host "Installed version $ins_version is equals to latest version $version. Aborting"
+	pause
+	exit
+}
 
 if(Test-Path $extractDir\$version) {
-	Write-Host "No new version found."
+	Write-Host "Old folder found, files already downloaded? Aborting."
 	pause
 	exit
 }
