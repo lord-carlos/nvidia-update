@@ -6,7 +6,8 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 
 #Options
 $cleanInstall = $FALSE          #Will delete old drivers and install the new ones
-$secondaryDrive = $FALSE        #If you don't want to download a 400Mb file to your SSD
+$secondaryDrive = $FALSE        #If you don't want to download a 400MB file to your SSD
+$customInstallFolder = "D"      #The above option should be enabled for this to take an effect. Default = D
 $scheduleTask = $FALSE          #To run this script every X week
 $scheduleDay = "Sunday"         #When should the task run. Default = Sunday
 $scheduleTime = "12pm"          #At what time should the task run. Default 12pm
@@ -55,7 +56,7 @@ if($version -eq $ins_version) {
 if (!$secondaryDrive) {
     $dlFile = "$env:temp\$version.exe"
 } else {
-    $dlFile = "D:\$version.exe"
+    $dlFile = "${customInstallFolder}:\$version.exe"
 }
 
 #Determening What Version Of Windows Is Being Used
@@ -64,7 +65,7 @@ if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9,1)) {
 } else {
 	$windowsVersion = "win8-win7"
 }
-if ((gwmi win32_operatingsystem | select osarchitecture).osarchitecture -eq "64-bit")
+if ((Get-WmiObject win32_operatingsystem | Select-Object osarchitecture).osarchitecture -eq "64-bit")
 {
 	$windowsArchitecture = "64bit"
 } else {
