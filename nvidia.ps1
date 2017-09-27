@@ -35,9 +35,10 @@ $args = "x $dlFile Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.
 Write-Host $args
 Start-Process  -FilePath $path_7z -ArgumentList $args -wait
 
-Write-Host "deleting DL file $dlFile"
+Write-Host "Deleting DL file $dlFile"
 del $dlFile
 
+Write-Host "Installing driver..."
 $install_args = "-s -noreboot -noeula"
 if($CLEAN){
 	$install_args = $install_args + " -clean"
@@ -45,4 +46,12 @@ if($CLEAN){
 
 Start-Process  -FilePath "$extractDir\$version\setup.exe" -ArgumentList $install_args -wait
 
-pause
+Write-Host "Driver installed. You may need to reboot to finish installation."
+Write-Host "Would you like to reboot now?"
+$Readhost = Read-Host "(Y/N) Default is no"
+Switch ($ReadHost){
+    Y {Write-host "Rebooting now..."; Restart-Computer -WhatIf}
+    N {Write-Host "Exiting script in 5 seconds."; Start-Sleep -s 5}
+    Default {Write-Host "Exiting script in 5 seconds"; Start-Sleep -s 5}
+} 
+exit
