@@ -79,6 +79,7 @@ $url = "http://us.download.nvidia.com/Windows/$version/$version-desktop-$windows
 Write-Host "Downloading the latest version to $dlFile"
 (New-Object System.Net.WebClient).DownloadFile($url, $dlFile)
 
+
 #Extracting The Files.
 Write-Host "Download finished, extracting the files now"
 if($archiverProgram = "$env:programfiles\7-zip\7z.exe") {
@@ -107,8 +108,16 @@ if ($scheduleTask -ne $FALSE) {
     Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Description $descreption 2>&1 | Out-Null
 }
 
+
 #Cleaning And Finishing.
-Write-Host "deleting downloaded file $dlFile"
+Write-Host "Deleting downloaded file $dlFile"
 Remove-Item $dlFile
-Write-Host "Press any key to exit"
-$key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+Write-Host "Driver installed. You may need to reboot to finish installation."
+Write-Host "Would you like to reboot now?"
+$Readhost = Read-Host "(Y/N) Default is no"
+Switch ($ReadHost){
+    Y {Write-host "Rebooting now..."; Restart-Computer -WhatIf}
+    N {Write-Host "Exiting script in 5 seconds."; Start-Sleep -s 5}
+    Default {Write-Host "Exiting script in 5 seconds"; Start-Sleep -s 5}
+} 
+exit
