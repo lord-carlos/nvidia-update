@@ -95,14 +95,14 @@ $url = "http://$location.download.nvidia.com/Windows/$version/$version-desktop-$
 
 
 # Downloading the installer
-Write-Host "Downloading the latest version to $dlFile."
+Write-Host "Downloading the latest version to $dlFile"
 (New-Object System.Net.WebClient).DownloadFile($url, $dlFile)
 
 
 # Extracting setup files
-Write-Host "Download finished, extracting the files now"
+Write-Host "Download finished, extracting the files now..."
 if($archiverProgram = "$env:programfiles\7-zip\7z.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe -o$extractDir\$version\" -wait
+    Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe -o""$extractDir\$version\""" -wait
 } elseif ($archiverProgram = "$env:programfiles\WinRAR\WinRAR.exe") {
     Start-Process -FilePath $archiverProgram -ArgumentList 'x $dlFile $extractDir\$version\ -IBCK Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe' -wait
 }
@@ -133,6 +133,7 @@ if ($scheduleTask -ne $FALSE) {
 # Cleaning up downloaded files
 Write-Host "Deleting downloaded file $dlFile"
 Remove-Item $dlFile
+Remove-Item $extractDir\$version\ -Force -Recurse
 
 
 # Driver installed, requesting a reboot
@@ -140,7 +141,7 @@ Write-Host "Driver installed. You may need to reboot to finish installation."
 Write-Host "Would you like to reboot now?"
 $Readhost = Read-Host "(Y/N) Default is no"
 Switch ($ReadHost){
-    Y {Write-host "Rebooting now..."; Restart-Computer}
+    Y {Write-host "Rebooting now..."; Start-Sleep -s 2; Restart-Computer}
     N {Write-Host "Exiting script in 5 seconds."; Start-Sleep -s 5}
     Default {Write-Host "Exiting script in 5 seconds"; Start-Sleep -s 5}
 } 
