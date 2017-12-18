@@ -133,7 +133,7 @@ if ($scheduleTask -ne $FALSE) {
 # Cleaning up downloaded files
 Write-Host "Deleting downloaded file $dlFile"
 Remove-Item $dlFile
-Remove-Item $extractDir\$version\ -Force -Recurse
+#Remove-Item $extractDir\$version\ -Force -Recurse
 
 
 # Driver installed, requesting a reboot
