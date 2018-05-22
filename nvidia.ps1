@@ -51,8 +51,9 @@ try {
     Write-Host "Installed version `t$ins_version"
 
 # Checking latest driver version from Nvidia website
-$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0' -Method GET
-$version = $link.parsedhtml.GetElementsByClassName("gridItem")[2].innerText
+$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0' -Method GET -UseBasicParsing
+$link -match '<td class="gridItem">([^<]+?)</td>' | Out-Null
+$version = $matches[1]
 Write-Host "Latest version `t`t$version"
 
 
