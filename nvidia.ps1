@@ -102,9 +102,9 @@ Write-Host "Downloading the latest version to $dlFile"
 
 # Extracting setup files
 Write-Host "Download finished, extracting the files now..."
-if($archiverProgram = "$env:programfiles\7-zip\7z.exe") {
+if($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
     Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe -o""$extractDir\$version\""" -wait
-} elseif ($archiverProgram = "$env:programfiles\WinRAR\WinRAR.exe") {
+} elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
     Start-Process -FilePath $archiverProgram -ArgumentList 'x $dlFile $extractDir\$version\ -IBCK Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe' -wait
 }
 
