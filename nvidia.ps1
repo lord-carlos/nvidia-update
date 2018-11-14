@@ -109,6 +109,10 @@ if($archiverProgram = "$env:programfiles\7-zip\7z.exe") {
 }
 
 
+# Remove unneeded dependencies from setup.cfg
+(Get-Content "$extractDir\$version\setup.cfg") | Where-Object {$_ -notmatch 'EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile'} | Set-Content "$extractDir\$version\setup.cfg" -Force
+
+
 # Installing drivers
 Write-Host "Installing Nvidia drivers now..."
 $install_args = "-s -noreboot -noeula"
