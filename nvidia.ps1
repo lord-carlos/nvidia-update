@@ -22,6 +22,7 @@ $location = "US"                # Set your location for download. US or UK (Defa
 
 # Extracting to current directory of the script file
 $extractDir = $PSScriptRoot 
+$filesToExtract = "Display.Driver HDAudio NVI2 PhysX EULA.txt ListDevices.txt setup.cfg setup.exe"
 
 
 # Checking if 7zip or WinRAR are installed
@@ -103,9 +104,9 @@ Write-Host "Downloading the latest version to $dlFile"
 # Extracting setup files
 Write-Host "Download finished, extracting the files now..."
 if($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe -o""$extractDir\$version\""" -wait
+    Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile $filesToExtract -o""$extractDir\$version\""" -wait
 } elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList 'x $dlFile $extractDir\$version\ -IBCK Display.Driver NVI2 EULA.txt ListDevices.txt setup.cfg setup.exe' -wait
+    Start-Process -FilePath $archiverProgram -ArgumentList 'x $dlFile $extractDir\$version\ -IBCK $filesToExtract' -wait
 }
 
 
