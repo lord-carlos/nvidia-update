@@ -11,16 +11,9 @@ param (
 )
 
 
-# Verify user has elevated permissions
-If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]::GetCurrent()).IsInRole([Security.Principal.WindowsBuiltInRole]"Administrator")) {
-    Start-Process powershell.exe "-NoProfile -ExecutionPolicy Bypass -File `"$PSCommandPath`"" -Verb RunAs
-    Exit
-}
-
-
-$scheduleTask = $FALSE          # Creates a Scheduled Task to run to check for driver updates
-$scheduleDay = "Sunday"         # When should the scheduled task should run (Default = Sunday)
-$scheduleTime = "12pm"          # The time the scheduled task should run (Default = 12pm)
+$scheduleTask = $false  # Creates a Scheduled Task to run to check for driver updates
+$scheduleDay = "Sunday" # When should the scheduled task should run (Default = Sunday)
+$scheduleTime = "12pm"  # The time the scheduled task should run (Default = 12pm)
 
 
 # Checking if 7zip or WinRAR are installed
