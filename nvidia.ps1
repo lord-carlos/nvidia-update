@@ -21,7 +21,6 @@ If (!([Security.Principal.WindowsPrincipal][Security.Principal.WindowsIdentity]:
 $scheduleTask = $FALSE          # Creates a Scheduled Task to run to check for driver updates
 $scheduleDay = "Sunday"         # When should the scheduled task should run (Default = Sunday)
 $scheduleTime = "12pm"          # The time the scheduled task should run (Default = 12pm)
-$location = "US"                # Set your location for download. US or UK (Default is US)
 
 
 # Checking if 7zip or WinRAR are installed
@@ -89,7 +88,7 @@ New-Item -Path $nvidiaTempFolder -ItemType Directory 2>&1 | Out-Null
 
 
 # Generating the download link
-$url = "http://$location.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-whql.exe"
+$url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-whql.exe"
 
 
 # Downloading the installer
