@@ -123,7 +123,7 @@ Start-Process -FilePath "$extractDir\$version\setup.exe" -ArgumentList $install_
 
 
 # Creating a scheduled task if the $scheduleTask varible is set to TRUE
-if ($scheduleTask -ne $FALSE) {
+if ($scheduleTask) {
     Write-Host "Creating A Scheduled Task..."
     New-Item C:\Task\ -type directory 2>&1 | Out-Null
     Copy-Item .\Nvidia.ps1 -Destination C:\Task\ 2>&1 | Out-Null
