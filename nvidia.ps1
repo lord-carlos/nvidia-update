@@ -59,7 +59,7 @@ Write-Host "Latest version `t`t$version"
 
 
 # Comparing installed driver version to latest driver version from Nvidia
-if ($version -eq $ins_version) {
+if (!$cleanInstall -and ($version -eq $ins_version)) {
     Write-Host "The installed version is the same as the latest version."
     Write-Host "Press any key to exit..."
     $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
