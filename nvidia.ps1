@@ -34,7 +34,7 @@ if (Test-Path $env:programfiles\7-zip\7z.exe) {
     Write-Host "Sorry but it looks like you don't have a supported archiver."
     Write-Host "Please install 7zip or WinRAR."
     Write-Host "Press any key to exit..."
-    $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
 }
 
@@ -46,7 +46,7 @@ try {
 } catch {
     Write-Host "Unable to detect a compatible Nvidia device."
     Write-Host "Press any key to exit..."
-    $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
 }
 Write-Host "Installed version `t$ins_version"
@@ -62,7 +62,7 @@ Write-Host "Latest version `t`t$version"
 if (!$cleanInstall -and ($version -eq $ins_version)) {
     Write-Host "The installed version is the same as the latest version."
     Write-Host "Press any key to exit..."
-    $key = $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
 }
 
