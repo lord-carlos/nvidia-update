@@ -8,26 +8,30 @@
 
 Checks for a new version of the Nvidia Driver, downloads and installs it.
 
-### usage
+## Usage
 
-* Download `nvidia.ps1` file into a folder of its own
-* Right click and press `Run with powershell`
-* The script will now detect your version, check for a new version online, download and extract it into the current directy.
+* Download `nvidia.ps1`
+* Right click and select `Run with PowerShell`
+* If the script finds a newer version of the nvidia driver online it will download and install it.
 
-Optional Parameters
+### Optional parameters
+
+* `-clean` - deletes the old driver and installs the newest one
+* `-folder <path_to_folder>` - the directory where the script will download and extract the new driver
+
+### How to pass the optional parameters
 
 * While holding `shift` press `right click` in the folder with the script
-* select `open powershell window here`
-* Enter:  `.\nvidia.ps1`
+* Select `Open PowerShell window here`
+* Enter `.\nvidia.ps1 <parameters>` (ex: `.\nvidia.ps1 -clean -folder C:\NVIDIA`)
 
-TODO: how to use parameters
+## Running the script regularly and automatically
 
-### Running the script regular and automaticly
-
-You can use `SchTasks` to run the script automaticly.
+You can use `SchTasks` to run the script automatically with:
 
 `SchTasks /Create /SC DAILY /TN “Nvidia-Updater” /TR “<path_to_script>” /ST 10:00`
 
-### Requirements
+## Requirements / Dependencies
 
-Nvidia-update needs 7zip or WinRar installed into default locations. It looks at `programfiles\7-zip\7z.exe` and `programfiles\WinRAR\WinRAR.exe` to extract the drivers.
+7-Zip or WinRar are needed to extract the drivers.
+They need to be installed in their default locations (`programfiles\7-zip\7z.exe` and `programfiles\WinRAR\WinRAR.exe`)
