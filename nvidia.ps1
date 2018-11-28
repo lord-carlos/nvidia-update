@@ -102,7 +102,7 @@ if ($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
 
 
 # Remove unneeded dependencies from setup.cfg
-(Get-Content "$extractFolder\setup.cfg") | Where-Object {$_ -notmatch 'name="\${{(EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile)}}'} | Set-Content "$extractFolder\setup.cfg" -Force
+(Get-Content "$extractFolder\setup.cfg") | Where-Object {$_ -notmatch 'name="\${{(EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile)}}'} | Set-Content "$extractFolder\setup.cfg" -Encoding UTF8 -Force
 
 
 # Installing drivers
