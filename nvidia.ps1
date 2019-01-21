@@ -22,11 +22,26 @@ if (Test-Path $env:programfiles\7-zip\7z.exe) {
 } elseif (Test-Path $env:programfiles\WinRAR\WinRAR.exe) {
     $archiverProgram = "$env:programfiles\WinRAR\WinRAR.exe"
 } else {
-    Write-Host "Sorry but it looks like you don't have a supported archiver."
-    Write-Host "Please install 7zip or WinRAR."
+    Write-Host "Sorry, but it looks like you don't have a supported archiver."
+    Write-Host ""
+    while ($choice -notmatch "[y|n]"){
+    $choice = read-host "Would you like to install 7-Zip now? (Y/N)"
+}
+    if ($choice -eq "y"){
+    # Download and silently install 7-zip if the user presses y
+    $7zip = "https://www.7-zip.org/a/7z1806-x64.exe"
+    $output = "$PSScriptRoot\7Zip.exe"
+    (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
+	
+    Start-Process "7Zip.exe" -Wait -ArgumentList "/S"
+    # Delete the installer once it completes
+    Remove-Item "$PSScriptRoot\7Zip.exe"
+}
+    else{
     Write-Host "Press any key to exit..."
     $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
+}
 }
 
 
