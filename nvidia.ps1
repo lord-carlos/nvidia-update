@@ -12,7 +12,7 @@ param (
 
 
 $scheduleTask = $false  # Creates a Scheduled Task to run to check for driver updates
-$scheduleDay = "Sunday" # When should the scheduled task should run (Default = Sunday)
+$scheduleDay = "Sunday" # When should the scheduled task run (Default = Sunday)
 $scheduleTime = "12pm"  # The time the scheduled task should run (Default = 12pm)
 
 
