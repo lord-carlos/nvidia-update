@@ -83,7 +83,7 @@ if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {
 
 
 # Checking Windows bitness
-if ((Get-WmiObject win32_operatingsystem | Select-Object osarchitecture).osarchitecture -eq "64-bit") {
+if ([Environment]::Is64BitOperatingSystem) {
     $windowsArchitecture = "64bit"
 } else {
     $windowsArchitecture = "32bit"
