@@ -29,7 +29,7 @@ if (Test-Path $env:programfiles\7-zip\7z.exe) {
 }
     if ($choice -eq "y"){
     # Download and silently install 7-zip if the user presses y
-    $7zip = "https://www.7-zip.org/a/7z1806-x64.exe"
+    $7zip = "https://www.7-zip.org/a/7z1900-x64.exe"
     $output = "$PSScriptRoot\7Zip.exe"
     (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
 	
