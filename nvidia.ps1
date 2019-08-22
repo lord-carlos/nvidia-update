@@ -97,6 +97,7 @@ New-Item -Path $nvidiaTempFolder -ItemType Directory 2>&1 | Out-Null
 
 # Generating the download link
 $url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-whql.exe"
+$rp_url = "https://international.download.nvidia.com/Windows/$version/$version-desktop-$windowsVersion-$windowsArchitecture-international-whql-rp.exe"
 
 
 # Downloading the installer
@@ -104,6 +105,12 @@ $dlFile = "$nvidiaTempFolder\$version.exe"
 Write-Host "Downloading the latest version to $dlFile"
 (New-Object System.Net.WebClient).DownloadFile($url, $dlFile)
 
+if ($?) {
+    Write-Host "Proceed..."
+} else {
+    Write-Host "Download failed, trying alternative RP package now..."
+    (New-Object System.Net.WebClient).DownloadFile($rp_url, $dlFile)
+}
 
 # Extracting setup files
 $extractFolder = "$nvidiaTempFolder\$version"
