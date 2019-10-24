@@ -123,7 +123,7 @@ $extractFolder = "$nvidiaTempFolder\$version"
 $filesToExtract = "Display.Driver HDAudio NVI2 PhysX EULA.txt ListDevices.txt setup.cfg setup.exe"
 Write-Host "Download finished, extracting the files now..."
 if ($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
-    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 $dlFile $filesToExtract -o""$extractFolder""" -wait
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 -bse1 -aoa $dlFile $filesToExtract -o""$extractFolder""" -wait
 }
 elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
     Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
@@ -136,7 +136,7 @@ elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
 
 # Installing drivers
 Write-Host "Installing Nvidia drivers now..."
-$install_args = "-passive -noreboot -noeula -s"
+$install_args = "-passive -noreboot -noeula -nofinish -s"
 if ($clean) {
     $install_args = $install_args + " -clean"
 }
