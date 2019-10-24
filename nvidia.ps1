@@ -108,14 +108,14 @@ $rp_url = "https://international.download.nvidia.com/Windows/$version/$version-d
 # Downloading the installer
 $dlFile = "$nvidiaTempFolder\$version.exe"
 Write-Host "Downloading the latest version to $dlFile"
-(New-Object System.Net.WebClient).DownloadFile($url, $dlFile)
+Start-BitsTransfer -Source $url -Destination $dlFile
 
 if ($?) {
     Write-Host "Proceed..."
 }
 else {
     Write-Host "Download failed, trying alternative RP package now..."
-    (New-Object System.Net.WebClient).DownloadFile($rp_url, $dlFile)
+    Start-BitsTransfer -Source $rp_url -Destination $dlFile
 }
 
 # Extracting setup files
@@ -123,10 +123,10 @@ $extractFolder = "$nvidiaTempFolder\$version"
 $filesToExtract = "Display.Driver HDAudio NVI2 PhysX EULA.txt ListDevices.txt setup.cfg setup.exe"
 Write-Host "Download finished, extracting the files now..."
 if ($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile $filesToExtract -o""$extractFolder""" -wait
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 $dlFile $filesToExtract -o""$extractFolder""" -wait
 }
 elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
 }
 
 
@@ -136,7 +136,7 @@ elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
 
 # Installing drivers
 Write-Host "Installing Nvidia drivers now..."
-$install_args = "-s -noreboot -noeula"
+$install_args = "-passive -noreboot -noeula -s"
 if ($clean) {
     $install_args = $install_args + " -clean"
 }
