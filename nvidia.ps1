@@ -6,7 +6,7 @@
 
 # Installer options
 param (
-    [switch]$clean = $false,        # Will delete old drivers and install the new ones
+    [switch]$clean = $false, # Will delete old drivers and install the new ones
     [string]$folder = "$env:temp"   # Downloads and extracts the driver here
 )
 
@@ -19,37 +19,40 @@ $scheduleTime = "12pm"  # The time the scheduled task should run (Default = 12pm
 # Checking if 7zip or WinRAR are installed
 if (Test-Path $env:programfiles\7-zip\7z.exe) {
     $archiverProgram = "$env:programfiles\7-zip\7z.exe"
-} elseif (Test-Path $env:programfiles\WinRAR\WinRAR.exe) {
+}
+elseif (Test-Path $env:programfiles\WinRAR\WinRAR.exe) {
     $archiverProgram = "$env:programfiles\WinRAR\WinRAR.exe"
-} else {
+}
+else {
     Write-Host "Sorry, but it looks like you don't have a supported archiver."
     Write-Host ""
-    while ($choice -notmatch "[y|n]"){
-    $choice = read-host "Would you like to install 7-Zip now? (Y/N)"
-}
-    if ($choice -eq "y"){
-    # Download and silently install 7-zip if the user presses y
-    $7zip = "https://www.7-zip.org/a/7z1900-x64.exe"
-    $output = "$PSScriptRoot\7Zip.exe"
-    (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
+    while ($choice -notmatch "[y|n]") {
+        $choice = read-host "Would you like to install 7-Zip now? (Y/N)"
+    }
+    if ($choice -eq "y") {
+        # Download and silently install 7-zip if the user presses y
+        $7zip = "https://www.7-zip.org/a/7z1900-x64.exe"
+        $output = "$PSScriptRoot\7Zip.exe"
+        (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
 	
-    Start-Process "7Zip.exe" -Wait -ArgumentList "/S"
-    # Delete the installer once it completes
-    Remove-Item "$PSScriptRoot\7Zip.exe"
-}
-    else{
-    Write-Host "Press any key to exit..."
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
-}
+        Start-Process "7Zip.exe" -Wait -ArgumentList "/S"
+        # Delete the installer once it completes
+        Remove-Item "$PSScriptRoot\7Zip.exe"
+    }
+    else {
+        Write-Host "Press any key to exit..."
+        $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+        exit
+    }
 }
 
 
 # Checking currently installed driver version
 Write-Host "Attempting to detect currently installed driver version..."
 try {
-    $ins_version = (Get-WmiObject Win32_PnPSignedDriver | Where-Object {$_.devicename -like "*nvidia*" -and $_.devicename -notlike "*audio*"}).DriverVersion.SubString(7).Remove(1, 1).Insert(3, ".")
-} catch {
+    $ins_version = (Get-WmiObject Win32_PnPSignedDriver | Where-Object { $_.devicename -like "*nvidia*" -and $_.devicename -notlike "*audio*" -and $_.devicename -notlike "*USB*" -and $_.devicename -notlike "*SHIELD*" }).DriverVersion.SubString(7).Remove(1, 1).Insert(3, ".")
+}
+catch {
     Write-Host "Unable to detect a compatible Nvidia device."
     Write-Host "Press any key to exit..."
     $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
@@ -77,7 +80,8 @@ if (!$clean -and ($version -eq $ins_version)) {
 # Checking Windows version
 if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {
     $windowsVersion = "win10"
-} else {
+}
+else {
     $windowsVersion = "win8-win7"
 }
 
@@ -85,7 +89,8 @@ if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {
 # Checking Windows bitness
 if ([Environment]::Is64BitOperatingSystem) {
     $windowsArchitecture = "64bit"
-} else {
+}
+else {
     $windowsArchitecture = "32bit"
 }
 
@@ -103,13 +108,14 @@ $rp_url = "https://international.download.nvidia.com/Windows/$version/$version-d
 # Downloading the installer
 $dlFile = "$nvidiaTempFolder\$version.exe"
 Write-Host "Downloading the latest version to $dlFile"
-(New-Object System.Net.WebClient).DownloadFile($url, $dlFile)
+Start-BitsTransfer -Source $url -Destination $dlFile
 
 if ($?) {
     Write-Host "Proceed..."
-} else {
+}
+else {
     Write-Host "Download failed, trying alternative RP package now..."
-    (New-Object System.Net.WebClient).DownloadFile($rp_url, $dlFile)
+    Start-BitsTransfer -Source $rp_url -Destination $dlFile
 }
 
 # Extracting setup files
@@ -117,19 +123,20 @@ $extractFolder = "$nvidiaTempFolder\$version"
 $filesToExtract = "Display.Driver HDAudio NVI2 PhysX EULA.txt ListDevices.txt setup.cfg setup.exe"
 Write-Host "Download finished, extracting the files now..."
 if ($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList "x $dlFile $filesToExtract -o""$extractFolder""" -wait
-} elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
-    Start-Process -FilePath $archiverProgram -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 -bse1 -aoa $dlFile $filesToExtract -o""$extractFolder""" -wait
+}
+elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
+    Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
 }
 
 
 # Remove unneeded dependencies from setup.cfg
-(Get-Content "$extractFolder\setup.cfg") | Where-Object {$_ -notmatch 'name="\${{(EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile)}}'} | Set-Content "$extractFolder\setup.cfg" -Encoding UTF8 -Force
+(Get-Content "$extractFolder\setup.cfg") | Where-Object { $_ -notmatch 'name="\${{(EulaHtmlFile|FunctionalConsentFile|PrivacyPolicyFile)}}' } | Set-Content "$extractFolder\setup.cfg" -Encoding UTF8 -Force
 
 
 # Installing drivers
 Write-Host "Installing Nvidia drivers now..."
-$install_args = "-s -noreboot -noeula"
+$install_args = "-passive -noreboot -noeula -nofinish -s"
 if ($clean) {
     $install_args = $install_args + " -clean"
 }
@@ -159,9 +166,9 @@ Write-Host "Driver installed. You may need to reboot to finish installation."
 Write-Host "Would you like to reboot now?"
 $Readhost = Read-Host "(Y/N) Default is no"
 Switch ($ReadHost) {
-    Y {Write-host "Rebooting now..."; Start-Sleep -s 2; Restart-Computer}
-    N {Write-Host "Exiting script in 5 seconds."; Start-Sleep -s 5}
-    Default {Write-Host "Exiting script in 5 seconds"; Start-Sleep -s 5}
+    Y { Write-host "Rebooting now..."; Start-Sleep -s 2; Restart-Computer }
+    N { Write-Host "Exiting script in 5 seconds."; Start-Sleep -s 5 }
+    Default { Write-Host "Exiting script in 5 seconds"; Start-Sleep -s 5 }
 }
 
 
