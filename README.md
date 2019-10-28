@@ -56,4 +56,4 @@ Q. How is checked the latest driver version from Nvidia website ?
 > * **osid**: Operating System ID (e.g. _Windows 10 64-bit_: 57)
 > * **lid**: Language ID (e.g. _English (US)_: 1)
 > * **whql**: Driver channel (_Certified_: 0, Beta: 1)
-> * **dtcid**: Windows Driver Type (_Standard_: 0, DHC: 1)
+> * **dtcid**: Windows Driver Type (_Standard_: 0, DCH: 1)
