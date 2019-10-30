@@ -57,3 +57,12 @@ Q. How do we check for the latest driver version from Nvidia website ?
 > * **lid**: Language ID (e.g. _English (US)_: 1)
 > * **whql**: Driver channel (_Certified_: 0, Beta: 1)
 > * **dtcid**: Windows Driver Type (_Standard_: 0, DCH: 1)
+
+Q. Why DCH drivers are not supported ?
+
+> While the DCH driver is exactly the same as the Standard one, the way DCH drivers are packaged differs.
+>
+> * Standard: To upgrade, you have either to download/install manually new drivers, or let GeForce Experience doing it.
+> * DCH: Windows Update will download and install the NVIDIA DCH Display Driver.
+>
+> For more informations, you can read the [NVIDIA Display Drivers for Windows 10 FAQ](https://nvidia.custhelp.com/app/answers/detail/a_id/4777/~/nvidia-dch%2Fstandard-display-drivers-for-windows-10-faq)
