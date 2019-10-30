@@ -41,3 +41,28 @@ schtasks /run /tn "Nvidia-Updater"
 
 7-Zip or WinRar are needed to extract the drivers.
 They need to be installed in their default locations (`programfiles\7-zip\7z.exe` and `programfiles\WinRAR\WinRAR.exe`)
+
+## FAQ
+
+Q. How do we check for the latest driver version from Nvidia website ?
+
+> We use the NVIDIA [Advanced Driver Search](https://www.nvidia.com/Download/Find.aspx).
+>
+> Example:
+> ```https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=845&osid=57&lid=1&whql=1&ctk=0&dtcid=0```
+>
+> * **psid**: Product Series ID (_GeForce 10 Series_: 101)
+> * **pfid**: Product ID (e.g. _GeForce GTX 1080 Ti_: 845)
+> * **osid**: Operating System ID (e.g. _Windows 10 64-bit_: 57)
+> * **lid**: Language ID (e.g. _English (US)_: 1)
+> * **whql**: Driver channel (_Certified_: 0, Beta: 1)
+> * **dtcid**: Windows Driver Type (_Standard_: 0, DCH: 1)
+
+Q. Why DCH drivers are not supported ?
+
+> While the DCH driver is exactly the same as the Standard one, the way DCH drivers are packaged differs.
+>
+> * Standard: To upgrade, you have either to download/install manually new drivers, or let GeForce Experience doing it.
+> * DCH: Windows Update will download and install the NVIDIA DCH Display Driver.
+>
+> For more informations, you can read the [NVIDIA Display Drivers for Windows 10 FAQ](https://nvidia.custhelp.com/app/answers/detail/a_id/4777/~/nvidia-dch%2Fstandard-display-drivers-for-windows-10-faq)

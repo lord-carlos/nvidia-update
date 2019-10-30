@@ -49,11 +49,18 @@ else {
 
 # Checking currently installed driver version
 Write-Host "Attempting to detect currently installed driver version..."
+if (Get-ItemProperty -Path HKLM:\SYSTEM\CurrentControlSet\Services\nvlddmkm -Name 'DCHUVen' -ErrorAction Ignore) {
+    Write-Host -ForegroundColor Yellow "DCH driver are not supported. Windows Update will download and install the NVIDIA DCH Display Driver."
+    Write-Host "Press any key to exit..."
+    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+    exit
+}
+
 try {
     $ins_version = (Get-WmiObject Win32_PnPSignedDriver | Where-Object { $_.devicename -like "*nvidia*" -and $_.devicename -notlike "*audio*" -and $_.devicename -notlike "*USB*" -and $_.devicename -notlike "*SHIELD*" }).DriverVersion.SubString(7).Remove(1, 1).Insert(3, ".")
 }
 catch {
-    Write-Host "Unable to detect a compatible Nvidia device."
+    Write-Host -ForegroundColor Yellow "Unable to detect a compatible Nvidia device."
     Write-Host "Press any key to exit..."
     $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
     exit
@@ -62,7 +69,7 @@ Write-Host "Installed version `t$ins_version"
 
 
 # Checking latest driver version from Nvidia website
-$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0' -Method GET -UseBasicParsing
+$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0&dtcid=0' -Method GET -UseBasicParsing
 $link -match '<td class="gridItem">([^<]+?)</td>' | Out-Null
 $version = $matches[1]
 Write-Host "Latest version `t`t$version"
@@ -162,7 +169,7 @@ Remove-Item $nvidiaTempFolder -Recurse -Force
 
 
 # Driver installed, requesting a reboot
-Write-Host "Driver installed. You may need to reboot to finish installation."
+Write-Host -ForegroundColor Green "Driver installed. You may need to reboot to finish installation."
 Write-Host "Would you like to reboot now?"
 $Readhost = Read-Host "(Y/N) Default is no"
 Switch ($ReadHost) {
