@@ -44,7 +44,7 @@ They need to be installed in their default locations (`programfiles\7-zip\7z.exe
 
 ## FAQ
 
-Q. How is checked the latest driver version from Nvidia website ?
+Q. How do we check for the latest driver version from Nvidia website ?
 
 > We use the NVIDIA [Advanced Driver Search](https://www.nvidia.com/Download/Find.aspx).
 >
