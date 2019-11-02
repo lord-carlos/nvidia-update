@@ -69,10 +69,10 @@ Write-Host "Installed version `t$ins_version"
 
 
 # Checking latest driver version from Nvidia website
-$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0&dtcid=0' -Method GET -UseBasicParsing
-$link -match '<td class="gridItem">([^<]+?)</td>' | Out-Null
-$version = $matches[1]
-Write-Host "Latest version `t`t$version"
+$response = Invoke-WebRequest -Uri 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php?func=DriverManualLookup&psid=111&pfid=890&osID=57&languageCode=1078&beta=null&isWHQL=0&dltype=-1&dch=1&upCRD=0&sort1=0&numberOfResults=10' -Method GET
+$payload = $response.Content | ConvertFrom-Json 
+$version =  $payload.IDS[0].downloadInfo.Version
+Write-Output "Latest version `t`t$version"
 
 
 # Comparing installed driver version to latest driver version from Nvidia
