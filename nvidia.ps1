@@ -148,10 +148,10 @@ else {
 $extractFolder = "$nvidiaTempFolder\$version"
 $filesToExtract = "Display.Driver HDAudio NVI2 PhysX EULA.txt ListDevices.txt setup.cfg setup.exe"
 Write-Host "Download finished, extracting the files now..."
-if ($archiverProgram -eq "$env:programfiles\7-zip\7z.exe") {
+if ($archiverProgram -eq "$7zpath\7z.exe") {
     Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList "x -bso0 -bsp1 -bse1 -aoa $dlFile $filesToExtract -o""$extractFolder""" -wait
 }
-elseif ($archiverProgram -eq "$env:programfiles\WinRAR\WinRAR.exe") {
+elseif ($archiverProgram -eq $winrarpath) {
     Start-Process -FilePath $archiverProgram -NoNewWindow -ArgumentList 'x $dlFile $extractFolder -IBCK $filesToExtract' -wait
 }
 
