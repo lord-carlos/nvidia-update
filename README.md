@@ -40,7 +40,7 @@ schtasks /run /tn "Nvidia-Updater"
 ## Requirements / Dependencies
 
 7-Zip or WinRar are needed to extract the drivers.
-They need to be installed in their default locations (`programfiles\7-zip\7z.exe` and `programfiles\WinRAR\WinRAR.exe`)
+
 
 ## FAQ
 
