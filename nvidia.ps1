@@ -17,34 +17,53 @@ $scheduleTime = "12pm"  # The time the scheduled task should run (Default = 12pm
 
 
 # Checking if 7zip or WinRAR are installed
-if (Test-Path $env:programfiles\7-zip\7z.exe) {
-    $archiverProgram = "$env:programfiles\7-zip\7z.exe"
-}
-elseif (Test-Path $env:programfiles\WinRAR\WinRAR.exe) {
-    $archiverProgram = "$env:programfiles\WinRAR\WinRAR.exe"
-}
-else {
-    Write-Host "Sorry, but it looks like you don't have a supported archiver."
-    Write-Host ""
-    while ($choice -notmatch "[y|n]") {
-        $choice = read-host "Would you like to install 7-Zip now? (Y/N)"
-    }
-    if ($choice -eq "y") {
-        # Download and silently install 7-zip if the user presses y
-        $7zip = "https://www.7-zip.org/a/7z1900-x64.exe"
-        $output = "$PSScriptRoot\7Zip.exe"
-        (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
-	
-        Start-Process "7Zip.exe" -Wait -ArgumentList "/S"
-        # Delete the installer once it completes
-        Remove-Item "$PSScriptRoot\7Zip.exe"
-    }
-    else {
-        Write-Host "Press any key to exit..."
-        $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        exit
-    }
-}
+#Check 7zip install path on registry
+if((Test-path HKLM:\SOFTWARE\7-Zip\) -eq $true){
+    $7zpath = Get-ItemProperty -path  HKLM:\SOFTWARE\7-Zip\ -Name Path  
+    $7zipinstalled = $true 
+   }
+   else{
+       $7zipinstalled = $false 
+   }
+   if($7zipinstalled -eq $true){
+   $7zpath = $7zpath.Path
+   $7zpathexe = $7zpath + "7z.exe"
+   if((Test-Path $7zpathexe) -eq $true){
+       $archiverProgram = $7zpath + "7z.exe"
+       }
+   }
+   elseif($7zipinstalled -eq $false){
+       if((Test-path HKLM:\SOFTWARE\WinRAR) -eq $true){
+           $winrarpath = Get-ItemProperty -Path HKLM:\SOFTWARE\WinRAR -Name exe64 
+           $winrarpath = $winrarpath.exe64
+       if((Test-Path $winrarpath) -eq $true){
+               $archiverProgram = $winrarpath
+           }
+       }
+   }
+   else {
+       Write-Host "Sorry, but it looks like you don't have a supported archiver."
+       Write-Host ""
+       while ($choice -notmatch "[y|n]") {
+           $choice = read-host "Would you like to install 7-Zip now? (Y/N)"
+       }
+       if ($choice -eq "y") {
+           # Download and silently install 7-zip if the user presses y
+           $7zip = "https://www.7-zip.org/a/7z1900-x64.exe"
+           $output = "$PSScriptRoot\7Zip.exe"
+           (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
+       
+           Start-Process "7Zip.exe" -Wait -ArgumentList "/S"
+           # Delete the installer once it completes
+           Remove-Item "$PSScriptRoot\7Zip.exe"
+       }
+       else {
+           Write-Host "Press any key to exit..."
+           $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+           exit
+       }
+   }
+   
 
 
 # Checking currently installed driver version
