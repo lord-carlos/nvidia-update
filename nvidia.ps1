@@ -8,6 +8,7 @@
 param (
     [switch]$clean = $false, # Will delete old drivers and install the new ones
     [string]$folder = "$env:temp"   # Downloads and extracts the driver here
+    [string]$lang = "en" # The lang
 )
 
 
