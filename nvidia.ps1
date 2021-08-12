@@ -102,7 +102,7 @@ if (!$clean -and ($version -eq $ins_version)) {
 
 # Checking Windows version
 if ([Environment]::OSVersion.Version -ge (new-object 'Version' 9, 1)) {
-    $windowsVersion = "win10"
+    $windowsVersion = "win10-win11"
 }
 else {
     $windowsVersion = "win8-win7"
