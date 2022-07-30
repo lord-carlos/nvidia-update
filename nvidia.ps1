@@ -5,83 +5,112 @@
 
 
 # Installer options
-param (
-    [switch]$clean = $false, # Will delete old drivers and install the new ones
-    [string]$folder = "$env:temp"   # Downloads and extracts the driver here
-)
+param
+(
+	[switch]
+	$clean = $false, # Will delete old drivers and install the new ones
 
+	[string]
+	$folder = "$env:TEMP"   # Downloads and extracts the driver here
+)
 
 $scheduleTask = $false  # Creates a Scheduled Task to run to check for driver updates
 $scheduleDay = "Sunday" # When should the scheduled task run (Default = Sunday)
 $scheduleTime = "12pm"  # The time the scheduled task should run (Default = 12pm)
 
-
 # Checking if 7zip or WinRAR are installed
 # Check 7zip install path on registry
-$7zipinstalled = $false 
-if ((Test-path HKLM:\SOFTWARE\7-Zip\) -eq $true) {
-    $7zpath = Get-ItemProperty -path  HKLM:\SOFTWARE\7-Zip\ -Name Path
-    $7zpath = $7zpath.Path
-    $7zpathexe = $7zpath + "7z.exe"
-    if ((Test-Path $7zpathexe) -eq $true) {
-        $archiverProgram = $7zpathexe
-        $7zipinstalled = $true 
-    }    
+if (Test-Path -Path HKLM:\SOFTWARE\7-Zip)
+{
+	$7zpath = Get-ItemProperty -Path HKLM:\SOFTWARE\7-Zip -Name Path
+	$7zpath = $7zpath.Path
+	$7zpathexe = Join-Path -Path $7zpath -ChildPath "7z.exe"
+	if (Test-Path -Path $7zpathexe)
+	{
+		$archiverProgram = $7zpathexe
+		$7zipinstalled = $true
+	}
 }
-elseif ($7zipinstalled -eq $false) {
-    if ((Test-path HKLM:\SOFTWARE\WinRAR) -eq $true) {
-        $winrarpath = Get-ItemProperty -Path HKLM:\SOFTWARE\WinRAR -Name exe64 
-        $winrarpath = $winrarpath.exe64
-        if ((Test-Path $winrarpath) -eq $true) {
-            $archiverProgram = $winrarpath
-        }
-    }
+elseif (-not $7zipinstalled)
+{
+	if (Test-Path -Path HKLM:\SOFTWARE\WinRAR)
+	{
+		$WinRARPath = Get-ItemProperty -Path HKLM:\SOFTWARE\WinRAR -Name exe64
+		$WinRARPath = $WinRARPath.exe64
+		if (Test-Path -Path $winrarpath)
+		{
+			$archiverProgram = $WinRARPath
+		}
+	}
 }
-else {
-    Write-Host "Sorry, but it looks like you don't have a supported archiver."
-    Write-Host ""
-    while ($choice -notmatch "[y|n]") {
-        $choice = read-host "Would you like to install 7-Zip now? (Y/N)"
-    }
-    if ($choice -eq "y") {
-        # Download and silently install 7-zip if the user presses y
-        $7zip = "https://www.7-zip.org/a/7z1900-x64.exe"
-        $output = "$PSScriptRoot\7Zip.exe"
-        (New-Object System.Net.WebClient).DownloadFile($7zip, $output)
-       
-        Start-Process "7Zip.exe" -Wait -ArgumentList "/S"
-        # Delete the installer once it completes
-        Remove-Item "$PSScriptRoot\7Zip.exe"
-    }
-    else {
-        Write-Host "Press any key to exit..."
-        $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-        exit
-    }
-}
-   
+else
+{
+	Write-Host "Sorry, but it looks like you don't have a supported archiver."
 
+	$Choice = Read-Host -Prompt "Would you like to install 7-Zip now? (Y/N)"
+	if ($Choice -eq 'y')
+	{
+		# Get the latest 7-Zip download URL
+		$Parameters = @{
+			Uri             = "https://sourceforge.net/projects/sevenzip/best_release.json"
+			UseBasicParsing = $true
+			Verbose         = $true
+		}
+		$bestRelease = (Invoke-RestMethod @Parameters).platform_releases.windows.filename
+
+		# Download the latest 7-Zip x64
+		$Parameters = @{
+			Uri             = "https://nchc.dl.sourceforge.net/project/sevenzip$($bestRelease)"
+			OutFile         = "$PSScriptRoot\7Zip.exe"
+			UseBasicParsing = $true
+			Verbose         = $true
+		}
+		Invoke-WebRequest @Parameters
+
+		Start-Process -FilePath "$PSScriptRoot\7Zip.exe" -Wait -ArgumentList "/S"
+
+		# Delete the installer once it completes
+		Remove-Item -Path "$PSScriptRoot\7Zip.exe" -Force
+	}
+	else
+	{
+		Write-Verbose -Message "Press any key to exit..." -Verbose
+		$host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+		exit
+	}
+}
 
 # Checking currently installed driver version
-Write-Host "Attempting to detect currently installed driver version..."
-try {
-    $VideoController = Get-WmiObject -ClassName Win32_VideoController | Where-Object { $_.Name -match "NVIDIA" }
-    $ins_version = ($VideoController.DriverVersion.Replace('.', '')[-5..-1] -join '').insert(3, '.')
+try
+{
+	if (Test-Path -Path "C:\Windows\System32\DriverStore\FileRepository\nv_dispi.inf_amd64_*\nvidia-smi.exe")
+	{
+		# The NVIDIA System Management Interface (nvidia-smi) is a command line utility, based on top of the NVIDIA Management Library (NVML)
+		$ins_version = nvidia-smi.exe --format=csv,noheader --query-gpu=driver_version
+	}
+
+	Write-Verbose -Message "Installed version: $ins_version" -Verbose
 }
-catch {
-    Write-Host -ForegroundColor Yellow "Unable to detect a compatible Nvidia device."
-    Write-Host "Press any key to exit..."
-    $host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
-    exit
+catch
+{
+	Write-Host -ForegroundColor Yellow "Unable to detect a compatible Nvidia device."
+	Write-Host "Press any key to exit..."
+	$host.UI.RawUI.ReadKey("NoEcho,IncludeKeyDown")
+	exit
 }
-Write-Host "Installed version `t$ins_version"
 
 
 # Checking latest driver version from Nvidia website
-$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0&dtcid=1' -Method GET -UseBasicParsing
+$Parameters = @{
+	Uri             = "https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0&dtcid=1"
+	Method          = "Get"
+	UseBasicParsing = $true
+	Verbose         = $true
+}
+$link = Invoke-WebRequest @Parameters
 $link -match '<td class="gridItem">([^<]+?)</td>' | Out-Null
 $version = $matches[1]
-Write-Host "Latest version `t`t$version"
+Write-Verbose -Message "Latest version: $version" -Verbose
 
 
 # Comparing installed driver version to latest driver version from Nvidia
@@ -167,33 +196,71 @@ Start-Process -FilePath "$extractFolder\setup.exe" -ArgumentList $install_args -
 
 
 # Creating a scheduled task if the $scheduleTask varible is set to TRUE
-if ($scheduleTask) {
-    Write-Host "Creating A Scheduled Task..."
-    New-Item C:\Task\ -type directory 2>&1 | Out-Null
-    Copy-Item .\Nvidia.ps1 -Destination C:\Task\ 2>&1 | Out-Null
-    $taskname = "Nvidia-Updater"
-    $description = "Update Your Driver!"
-    $action = New-ScheduledTaskAction -Execute "C:\Task\Nvidia.ps1"
-    $trigger = New-ScheduledTaskTrigger -Weekly -WeeksInterval $scheduleTask -DaysOfWeek $scheduleDay -At $scheduleTime
-    Register-ScheduledTask -TaskName $taskname -Action $action -Trigger $trigger -Description $description 2>&1 | Out-Null
-}
+if ($scheduleTask)
+{
+	Write-Verbose -Message "Creating A Scheduled Task..." -Verbose
 
+	$Parameters = @{
+		Path     = $env:SystemDrive\Task
+		ItemType = "Directory"
+		Force    = $true
+	}
+	New-Item @Parameters
+
+	$Parameters = @{
+		Path     = $env:SystemDrive\Task
+		ItemType = "Directory"
+		Force    = $true
+	}
+	Copy-Item @Parameters
+
+	$ScriptName = Split-Path -Path $PSCommandPath -Leaf
+	Copy-Item -Path $ScriptName -Destination $env:SystemDrive\Task
+
+	$scheduleDay = "Sunday" # When should the scheduled task run (Default = Sunday)
+	$scheduleTime = "12pm"  # The time the scheduled task should run (Default = 12pm)
+	$Action     = New-ScheduledTaskAction -Execute powershell.exe -Argument "-ExecutionPolicy Bypass -NoProfile -NoLogo -WindowStyle Hidden -File `"$env:SystemDrive\Task\Nvidia.ps1`""
+	$Trigger    = New-ScheduledTaskTrigger -Weekly -WeeksInterval $scheduleTask -DaysOfWeek $scheduleDay -At $scheduleTime
+	$Settings   = New-ScheduledTaskSettingsSet -Compatibility Win8
+	$Principal  = New-ScheduledTaskPrincipal -UserId $env:USERNAME -RunLevel Highest
+	$Parameters = @{
+		TaskName    = "Nvidia-Updater"
+		Description = "Update Your Driver!"
+		Principal   = $Principal
+		Action      = $Action
+		Settings    = $Settings
+		Trigger     = $Trigger
+	}
+	Register-ScheduledTask @Parameters -Force
+}
 
 # Cleaning up downloaded files
 Write-Host "Deleting downloaded files"
 Remove-Item $nvidiaTempFolder -Recurse -Force
 
-
 # Driver installed, requesting a reboot
 Write-Host -ForegroundColor Green "Driver installed. You may need to reboot to finish installation."
 Write-Host "Would you like to reboot now?"
-$Readhost = Read-Host "(Y/N) Default is no"
-Switch ($ReadHost) {
-    Y { Write-host "Rebooting now..."; Start-Sleep -s 2; Restart-Computer }
-    N { Write-Host "Exiting script in 5 seconds."; Start-Sleep -s 5 }
-    Default { Write-Host "Exiting script in 5 seconds"; Start-Sleep -s 5 }
+$Readhost = Read-Host -Prompt "(Y/N) Default is no"
+switch ($ReadHost)
+{
+	Y
+	{
+		Write-Verbose -Message "Rebooting now..." -Verbose
+		Start-Sleep -Seconds 2
+		Restart-Computer
+	}
+	N
+	{
+		Write-Verbose -Message "Exiting script in 5 seconds." -Verbose
+		Start-Sleep -Seconds 5
+	}
+	Default
+	{
+		Write-Verbose -Message "Exiting script in 5 seconds" -Verbose
+		Start-Sleep -Seconds 5
+	}
 }
-
 
 # End of script
 exit
