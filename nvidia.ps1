@@ -77,11 +77,24 @@ catch {
 Write-Host "Installed version `t$ins_version"
 
 
-# Checking latest driver version from Nvidia website
-$link = Invoke-WebRequest -Uri 'https://www.nvidia.com/Download/processFind.aspx?psid=101&pfid=816&osid=57&lid=1&whql=1&lang=en-us&ctk=0&dtcid=1' -Method GET -UseBasicParsing
-$link -match '<td class="gridItem">([^<]+?)</td>' | Out-Null
-$version = $matches[1]
-Write-Host "Latest version `t`t$version"
+# Checking latest driver version
+$uri = 'https://gfwsl.geforce.com/services_toolkit/services/com/nvidia/services/AjaxDriverService.php' +
+'?func=DriverManualLookup' +
+'&psid=120' + # Geforce RTX 30 Series
+'&pfid=929' +  # RTX 3080
+'&osID=57' + # Windows 10 64bit
+'&languageCode=1033' + # en-US; seems to be "Windows Locale ID"[1] in decimal
+'&isWHQL=1' + # WHQL certified
+'&dch=1' + # DCH drivers (the new standard)
+'&sort1=0' + # sort: most recent first(?)
+'&numberOfResults=1' # single, most recent result is enough
+
+#[1]: https://learn.microsoft.com/en-us/openspecs/windows_protocols/ms-lcid/a9eac961-e77d-41a6-90a5-ce1a8b0cdb9c
+
+$response = Invoke-WebRequest -Uri $uri -Method GET -UseBasicParsing
+$payload = $response.Content | ConvertFrom-Json
+$version =  $payload.IDS[0].downloadInfo.Version
+Write-Output "Latest version `t`t$version"
 
 
 # Comparing installed driver version to latest driver version from Nvidia
